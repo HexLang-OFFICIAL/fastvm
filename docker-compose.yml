@@ -55,17 +55,17 @@ services:
           cpus: '${FASTVM_CPU_LIMIT:-0}'
           memory: ${FASTVM_MEMORY_LIMIT:-0}
     
-    # Restart policy (disabled for debugging)
-    restart: "no"
+    # Restart policy - auto-start on system boot/codespace restart
+    restart: unless-stopped
     
-    # Health check (disabled for debugging)
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:3000/"]
-    #   interval: ${FASTVM_HEALTH_INTERVAL:-30s}
-    #   timeout: ${FASTVM_HEALTH_TIMEOUT:-10s}
-    #   retries: 3
-    #   start_period: 60s
-    #   disable: ${FASTVM_HEALTHCHECK_DISABLE:-false}
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: ${FASTVM_HEALTH_INTERVAL:-30s}
+      timeout: ${FASTVM_HEALTH_TIMEOUT:-10s}
+      retries: 3
+      start_period: 60s
+      disable: ${FASTVM_HEALTHCHECK_DISABLE:-false}
     
     # Logging
     logging:
