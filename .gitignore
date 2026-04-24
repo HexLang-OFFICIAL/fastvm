@@ -23,3 +23,5 @@ Thumbs.db
 # Build artifacts
 *.tar
 *.tar.gz
+data/.cache/mozilla/firefox/
+data/.XDG/
