@@ -1,16 +1,31 @@
 #!/usr/bin/with-contenv bash
 # s6 service: FastVM management dashboard (Node.js, port 3001).
+# Designed to fail soft — if Node or the dashboard isn't installed, just
+# sleep so s6 doesn't enter a tight restart loop and pollute the logs.
 
-cd /opt/fastvm-dashboard || exec sleep 30
+cd /opt/fastvm-dashboard 2>/dev/null || { echo "[dashboard] /opt/fastvm-dashboard missing; sleeping"; exec sleep 86400; }
 
-# Make sure the recordings + backups + logs dirs exist.
-mkdir -p /config/backups /config/recordings /config/.fastvm /var/log/fastvm
+if ! command -v node >/dev/null 2>&1; then
+    echo "[dashboard] node not found; sleeping"
+    exec sleep 86400
+fi
+
+if [[ ! -d node_modules/express ]]; then
+    echo "[dashboard] node_modules missing; attempting install"
+    npm install --omit=dev --no-audit --no-fund 2>&1 || {
+        echo "[dashboard] npm install failed; sleeping"
+        exec sleep 86400
+    }
+fi
+
+mkdir -p /config/backups /config/recordings /config/.fastvm /var/log/fastvm 2>/dev/null || true
 
 export NODE_ENV=production
 export FASTVM_DATA_ROOT=/config
 export FASTVM_BACKUP_DIR=/config/backups
 export FASTVM_RECORDINGS_DIR=/config/recordings
 export FASTVM_SCRIPTS_DIR=/fastvm-scripts
-export FASTVM_DASHBOARD_PORT="${FASTVM_DASHBOARD_PORT:-3001}"
+export FASTVM_DASHBOARD_PORT="${FASTVM_DASHBOARD_PORT:-8099}"
 
+echo "[dashboard] starting on :${FASTVM_DASHBOARD_PORT}"
 exec s6-setuidgid abc node server.js

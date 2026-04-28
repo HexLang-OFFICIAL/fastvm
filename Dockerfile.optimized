@@ -29,8 +29,6 @@ RUN set -eu && \
     rm -f /etc/apt/sources.list.d/nodesource.list || true && \
     # Add Mozilla PPA for Firefox
     add-apt-repository -y ppa:mozillateam/ppa && \
-    # Add NodeSource for Node.js 20 LTS
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         # Core utils
@@ -41,15 +39,14 @@ RUN set -eu && \
         ca-certificates \
         software-properties-common \
         apt-transport-https \
-        # Node.js (dashboard)
-        nodejs \
+        # Note: nodejs + npm already provided by base image (NodeSource Node 18)
         # Audio
         pulseaudio \
         pulseaudio-utils \
         libpulse0 \
         # Screen recording
         ffmpeg \
-        xdpyinfo \
+        x11-utils \
         # Clipboard sync
         xclip \
         xsel \
@@ -58,7 +55,6 @@ RUN set -eu && \
         # Compression extras
         zstd \
         # Misc runtime
-        ionice \
         procps \
         net-tools && \
     rm -rf /var/lib/apt/lists/*
@@ -90,7 +86,7 @@ RUN chmod +x /opt/fastvm-scripts/*.sh
 # =============================================================================
 COPY dashboard/ /opt/fastvm-dashboard/
 RUN cd /opt/fastvm-dashboard && \
-    npm ci --omit=dev && \
+    npm install --omit=dev --no-audit --no-fund && \
     npm cache clean --force
 
 # =============================================================================
