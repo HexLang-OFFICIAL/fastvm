@@ -29,8 +29,6 @@ RUN set -eu && \
     rm -f /etc/apt/sources.list.d/nodesource.list || true && \
     # Add Mozilla PPA for Firefox
     add-apt-repository -y ppa:mozillateam/ppa && \
-    # Add NodeSource for Node.js 20 LTS
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         # Core utils
@@ -41,8 +39,9 @@ RUN set -eu && \
         ca-certificates \
         software-properties-common \
         apt-transport-https \
-        # Node.js (dashboard)
+        # Node.js (Ubuntu's Node 18 is compatible with base image native modules)
         nodejs \
+        npm \
         # Audio
         pulseaudio \
         pulseaudio-utils \
