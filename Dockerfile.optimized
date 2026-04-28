@@ -89,7 +89,7 @@ RUN chmod +x /opt/fastvm-scripts/*.sh
 # =============================================================================
 COPY dashboard/ /opt/fastvm-dashboard/
 RUN cd /opt/fastvm-dashboard && \
-    npm ci --omit=dev && \
+    npm install --omit=dev --no-audit --no-fund && \
     npm cache clean --force
 
 # =============================================================================
