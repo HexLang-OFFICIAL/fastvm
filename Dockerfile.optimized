@@ -39,9 +39,7 @@ RUN set -eu && \
         ca-certificates \
         software-properties-common \
         apt-transport-https \
-        # Node.js (Ubuntu's Node 18 is compatible with base image native modules)
-        nodejs \
-        npm \
+        # Note: nodejs + npm already provided by base image (NodeSource Node 18)
         # Audio
         pulseaudio \
         pulseaudio-utils \
