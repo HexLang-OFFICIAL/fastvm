@@ -47,7 +47,7 @@ services:
 
     ports:
       - "${FASTVM_PORT:-3000}:3000"
-      - "${FASTVM_DASHBOARD_PORT:-3001}:3001"
+      - "3001:3001"
 
     volumes:
       - ./data:/config
