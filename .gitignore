@@ -1,6 +1,15 @@
 # Runtime data
 data/
 logs/
+backups/
+recordings/
+
+# Dashboard secrets
+dashboard.token
+
+# Node
+dashboard/node_modules/
+dashboard/package-lock.json
 
 # Docker
 .dockerignore
@@ -23,8 +32,3 @@ Thumbs.db
 # Build artifacts
 *.tar
 *.tar.gz
-data/.cache/mozilla/firefox/
-data/.XDG/
-data/.config/mozilla/
-data/.cache/
-data/.XDG/

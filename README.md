@@ -1,125 +1,179 @@
 # FastVM
 
-An optimized, faster version of BlobeVM - a Virtual Machine that runs entirely in your web browser with improved performance, better error handling, and flexible configuration.
+**FastVM gives you a full Linux desktop inside a GitHub Codespace — accessible from any browser, no local installs required.** Fork this repo, open it in a Codespace, run one command, and you have a working Linux desktop in a new browser tab.
 
-## 🚀 Key Improvements Over BlobeVM
+---
 
-| Feature | BlobeVM | FastVM |
-|---------|---------|--------|
-| Docker Cache | `--no-cache` (slow) | ✅ Cache enabled (fast) |
-| Error Handling | Basic | ✅ `set -euo pipefail` |
-| Sleep Delays | Multiple delays | ✅ No unnecessary delays |
-| Management | Raw docker commands | ✅ Docker Compose |
-| APT Operations | Multiple updates | ✅ Single consolidated update |
-| JSON Parsing | `jq \| grep` | ✅ jq exit codes |
-| Configuration | Hardcoded | ✅ Environment variables |
-| App Installation | Sequential | ✅ Parallel processing |
-| Health Checks | None | ✅ Built-in health checks |
-| Resource Limits | None | ✅ Configurable limits |
+## 📖 Table of Contents
 
-## 📋 Requirements
+1. [How It Works](#-how-it-works)
+2. [Quick Start](#-quick-start)
+3. [Accessing Your Desktop](#-accessing-your-desktop)
+4. [Customizing FastVM](#️-customizing-fastvm)
+5. [Managing FastVM](#-managing-fastvm)
+6. [Troubleshooting](#-troubleshooting)
+7. [File Structure](#-file-structure)
+8. [Contributing](#-contributing)
 
-- Docker (with daemon running)
-- Docker Compose (v1 or v2)
-- Git
-- jq (will be auto-installed if missing)
-- Linux/macOS/WSL2
+---
+
+## 💡 How It Works
+
+FastVM runs a full Linux desktop environment inside a Docker container. The desktop is streamed to your browser via a built-in web interface — no VNC client needed. Because it runs inside a GitHub Codespace, everything happens in the cloud:
+
+- **No local installs** — Docker, Git, and everything else are already in the Codespace
+- **Access from anywhere** — open your Codespace from any device with a browser
+- **Persistent storage** — your files survive Codespace restarts via the `data/` folder
+- **Auto-restart** — the container restarts automatically when your Codespace resumes
+
+---
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Step 1 — Fork this repository
+
+Click **Fork** at the top of this page to create your own copy of FastVM. Your settings and data will live in your fork.
+
+---
+
+### Step 2 — Open in a Codespace
+
+On your forked repo, click **Code → Codespaces → Create codespace on main**.
+
+> **For better performance**, choose a machine type with at least **4 cores and 8 GB RAM** when creating the Codespace. XFCE4 runs acceptably on 2-core machines; KDE/GNOME need more headroom.
+
+Wait for the Codespace to finish loading — you'll see a VS Code editor in your browser.
+
+---
+
+### Step 3 — (Optional) Customize before installing
+
+Open `config.env` in the editor. The defaults work fine, but common things to change:
 
 ```bash
-git clone https://github.com/Hexlang-OFFICIAL/fastvm.git
-cd fastvm
+# Your timezone — makes the clock correct inside the desktop
+# Examples: America/New_York, Europe/London, Asia/Tokyo
+FASTVM_TZ=Etc/UTC
+
+# Desktop environment (XFCE4 is the best starting point)
+FASTVM_DE=XFCE4
 ```
 
-### 2. Configure (Optional)
+Save the file when done. You can always change these later and restart.
 
-Edit `config.env` to customize your setup:
+---
 
-```bash
-# Change the port
-FASTVM_PORT=8080
+### Step 4 — Run the installer
 
-# Change desktop environment
-FASTVM_DE=KDE
-
-# Enable KVM acceleration
-FASTVM_ENABLE_KVM=true
-```
-
-### 3. Install
+In the Codespace terminal (`` Ctrl+` `` to open it), run:
 
 ```bash
 chmod +x fastvm-install.sh
 ./fastvm-install.sh
 ```
 
-### 4. Access
+The installer will:
+1. Confirm Docker and Git are available
+2. Build the Docker image (takes **5–15 minutes** the first time — normal!)
+3. Start the container
+4. Print the access URL
 
-Open your browser and navigate to `http://localhost:3000` (or your configured port).
+> ☕ Grab a coffee — the first build downloads a full Linux image.
 
-## ⚙️ Configuration
+---
 
-All configuration is done through the `config.env` file:
+### Step 5 — Open FastVM in your browser
 
-### Network Settings
+When the installer finishes you'll see:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `FASTVM_PORT` | 3000 | Web interface port |
-| `FASTVM_NAME` | FastVM | Container name |
-
-### User Settings
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `FASTVM_PUID` | 1000 | User ID for file permissions |
-| `FASTVM_PGID` | 1000 | Group ID for file permissions |
-| `FASTVM_TZ` | Etc/UTC | Timezone |
-
-### Resource Limits
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `FASTVM_SHM_SIZE` | 2gb | Shared memory size |
-| `FASTVM_CPU_LIMIT` | 0 | CPU cores (0 = unlimited) |
-| `FASTVM_MEMORY_LIMIT` | 0 | Memory limit (0 = unlimited) |
-
-### Desktop Environments
-
-| Variable | Description |
-|----------|-------------|
-| `FASTVM_DE=KDE` | Full-featured, heavy |
-| `FASTVM_DE=XFCE4` | Balanced, lightweight (default) |
-| `FASTVM_DE=I3` | Tiling WM, very lightweight |
-| `FASTVM_DE=GNOME` | Modern, very heavy |
-| `FASTVM_DE=Cinnamon` | Traditional, medium |
-| `FASTVM_DE=LXQT` | Lightweight Qt-based |
-
-### Application Selection
-
-```bash
-# Default Apps
-FASTVM_APP_WINE=true
-FASTVM_APP_CHROME=true
-FASTVM_APP_DISCORD=true
-FASTVM_APP_STEAM=true
-
-# Programming
-FASTVM_PROG_VSCODIUM=true
-
-# Additional Apps
-FASTVM_APP_LIBREOFFICE=true
+```
+  - Local URL:    http://localhost:3000
 ```
 
-## 🐳 Docker Compose Commands
+GitHub will show a pop-up offering to open the forwarded port — click **Open in Browser**. You can also go to the **Ports** tab in VS Code (`Ctrl+Shift+P` → "Ports: Focus on Ports View"), find port 3000, and click the globe icon.
 
-FastVM uses Docker Compose for easy management:
+You should see a Linux desktop load in the new tab. 🎉
+
+---
+
+## 🖥️ Accessing Your Desktop
+
+### Finding the URL after the Codespace restarts
+
+FastVM restarts automatically when your Codespace resumes. To find the desktop URL again:
+
+1. Open the **Ports** tab in VS Code
+2. Find port **3000**
+3. Click the globe 🌐 icon to open it
+
+### Making the port public
+
+By default the forwarded port is private (only you can access it). To share it:
+
+1. Open the **Ports** tab
+2. Right-click port 3000 → **Port Visibility → Public**
+
+> ⚠️ Anyone with the URL can access the desktop when set to Public. Only share it if you intend to.
+
+### What you'll see
+
+After opening the URL you'll see an **XFCE4 desktop** (or whichever desktop you chose):
+
+- **Right-click** the desktop to open the application menu
+- **The taskbar** at the bottom has common apps
+- **File manager, terminal, and browser** are available by default
+
+---
+
+## ⚙️ Customizing FastVM
+
+All settings live in `config.env`. Edit the file, then [restart FastVM](#-managing-fastvm) for changes to take effect.
+
+### Choosing a desktop environment
+
+| Setting | Best for |
+|---------|----------|
+| `FASTVM_DE=XFCE4` | **Recommended** — fast and easy to use |
+| `FASTVM_DE=KDE` | Full-featured, looks great, needs more RAM |
+| `FASTVM_DE=GNOME` | Modern look, similar to macOS, needs the most RAM |
+| `FASTVM_DE=Cinnamon` | Feels like Windows, medium resource use |
+| `FASTVM_DE=LXQT` | Very lightweight, best for 2-core Codespaces |
+| `FASTVM_DE=I3` | Keyboard-driven tiling layout, for advanced users |
+
+### Choosing which apps to pre-install
+
+Set to `true` to install, `false` to skip:
 
 ```bash
-# Start FastVM
+FASTVM_APP_WINE=true        # Run Windows .exe files inside Linux
+FASTVM_APP_CHROME=true      # Google Chrome browser
+FASTVM_APP_DISCORD=false    # Discord chat app
+FASTVM_APP_STEAM=false      # Steam game launcher
+FASTVM_APP_MINECRAFT=false  # Minecraft launcher
+FASTVM_APP_VLC=false        # VLC media player
+FASTVM_APP_LIBREOFFICE=false # Office suite (Word/Excel alternative)
+
+# Programming tools
+FASTVM_PROG_VSCODIUM=false  # VS Code (open-source version)
+FASTVM_PROG_JAVA17=false    # Java 17
+```
+
+### Codespace machine size recommendations
+
+| Codespace machine | Recommended desktop | Notes |
+|-------------------|--------------------|----|
+| 2-core / 8 GB | XFCE4 or LXQT | Functional; avoid Chrome inside the VM |
+| 4-core / 16 GB | XFCE4, KDE, or Cinnamon | Good everyday experience |
+| 8-core / 32 GB | Any | Smooth even with heavy apps |
+
+---
+
+## 🐳 Managing FastVM
+
+After the first install, use these commands in the Codespace terminal:
+
+```bash
+# Start FastVM (after stopping it)
 docker-compose up -d
 
 # Stop FastVM
@@ -128,133 +182,114 @@ docker-compose stop
 # Restart FastVM
 docker-compose restart
 
-# View logs
+# View live logs (useful for troubleshooting)
 docker-compose logs -f
 
-# Update/rebuild
-docker-compose build
-docker-compose up -d
-
-# Remove completely
+# Remove the container (your data/ folder stays safe)
 docker-compose down
 ```
 
-## 🔧 Advanced Usage
+> **Tip:** Your files are always safe in the `data/` folder, even after `docker-compose down`.
 
-### Custom Build
+### Updating FastVM
 
 ```bash
-# Build with specific arguments
-export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-export VERSION=1.0.0
+git pull
 docker-compose build
+docker-compose up -d
 ```
 
-### Health Checks
-
-FastVM includes built-in health checks:
-
-```bash
-# Check health status
-docker inspect --format='{{.State.Health.Status}}' FastVM
-
-# View health check logs
-docker inspect --format='{{json .State.Health}}' FastVM | jq
-```
-
-### Resource Monitoring
-
-```bash
-# View container stats
-docker stats FastVM
-
-# View resource limits
-docker inspect --format='{{.HostConfig}}' FastVM
-```
+---
 
 ## 🛠️ Troubleshooting
 
-### Container Won't Start
+### "The port isn't showing up / the page won't load"
+
+The container may still be starting. Wait about 60 seconds after running the installer, then refresh. Check whether it's running:
 
 ```bash
-# Check logs
-docker-compose logs
-
-# Verify configuration
-docker-compose config
-
-# Check for port conflicts
-sudo lsof -i :3000
+docker ps
 ```
 
-### Permission Issues
+You should see a container named `FastVM`. If not, check the logs:
 
 ```bash
-# Fix data directory permissions
+docker-compose logs
+```
+
+### "The desktop is slow"
+
+Codespace performance depends on machine type. Try these fixes:
+
+1. **Upgrade your Codespace machine** — go to the Codespace settings and switch to a 4-core or 8-core machine.
+2. **Switch to a lighter desktop** in `config.env`:
+   ```bash
+   FASTVM_DE=XFCE4
+   ```
+3. **Give it more shared memory** (helps if apps crash or freeze):
+   ```bash
+   FASTVM_SHM_SIZE=4gb
+   ```
+
+### "Permission denied" errors
+
+```bash
 sudo chown -R 1000:1000 ./data
 ```
 
-### Slow Performance
+### "The build failed"
 
-1. Enable KVM acceleration: `FASTVM_ENABLE_KVM=true`
-2. Increase shared memory: `FASTVM_SHM_SIZE=4gb`
-3. Allocate more resources: `FASTVM_MEMORY_LIMIT=4g`
-
-### Build Failures
+Try a clean rebuild:
 
 ```bash
-# Clean build (use cache but rebuild)
-docker-compose build --no-cache
-
-# Or force rebuild
 docker-compose down
-docker-compose build
+docker-compose build --no-cache
 docker-compose up -d
 ```
+
+### "I don't see my changes after editing config.env"
+
+You need to restart the container:
+
+```bash
+docker-compose down
+./fastvm-install.sh
+```
+
+---
 
 ## 📁 File Structure
 
 ```
-FastVM/
-├── config.env              # Configuration file
-├── docker-compose.yml      # Docker Compose configuration
-├── Dockerfile.optimized    # Optimized Dockerfile
-├── fastvm-install.sh       # Main installation script
-├── fastvm-setup.sh         # Desktop environment setup
-├── installapps-parallel.sh # Parallel app installation
-├── README.md              # This file
-├── data/                  # Persistent data (created on install)
-└── logs/                  # Log files (created on install)
+fastvm/
+├── config.env              ← Edit this to customize FastVM
+├── docker-compose.yml      ← Defines how Docker runs the container
+├── Dockerfile.optimized    ← Instructions for building the image
+├── fastvm-install.sh       ← The installer script
+├── fastvm-setup.sh         ← Sets up the desktop environment inside the container
+├── installapps-parallel.sh ← Installs your selected apps in parallel
+├── README.md               ← This file
+├── data/                   ← Your persistent files (created on first run)
+└── logs/                   ← Log files (created on first run)
 ```
 
-## 🔒 Security
-
-- Runs in isolated Docker container
-- Uses seccomp unconfined for compatibility
-- Optional KVM device access (configurable)
-- User namespace mapping support
-
-## 📝 Performance Tips
-
-1. **Use Cache**: Never use `--no-cache` unless debugging build issues
-2. **Enable KVM**: Set `FASTVM_ENABLE_KVM=true` for better performance
-3. **Resource Limits**: Set appropriate CPU/memory limits
-4. **SSD Storage**: Use SSD for data directory for better I/O
-5. **Network**: Use local network for faster builds
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please ensure:
+Contributions are welcome! When contributing code, please follow these conventions already used in the project:
 
-1. Code follows `set -euo pipefail` error handling
-2. No unnecessary `sleep` commands
-3. Use `jq -e` instead of `jq | grep`
-4. Consolidate APT operations
-5. Add proper logging
+- Scripts use `set -euo pipefail` for strict error handling
+- No unnecessary `sleep` delays
+- Use `jq -e` instead of `jq | grep`
+- Consolidate APT operations into a single `apt-get update`
+- Add logging with the `log_info` / `log_success` / `log_error` helpers
+
+---
 
 ## 📜 License
 
-This project is based on BlobeVM and maintains the same license terms.
+This project is based on the original BlobeVM and maintains the same license terms.
 
 ## 🙏 Acknowledgments
 

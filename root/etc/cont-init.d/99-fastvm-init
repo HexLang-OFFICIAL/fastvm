@@ -1,0 +1,52 @@
+#!/usr/bin/with-contenv bash
+# Container init: install FastVM scripts into /fastvm-scripts and configure
+# default cron tasks. Intentionally permissive — never abort s6 boot, since
+# that would prevent KasmVNC and the desktop from starting.
+
+# NOTE: do NOT use `set -e` here. cont-init.d scripts that abort prevent the
+# whole stack (including nginx + KasmVNC) from coming up.
+
+# 1. Stage scripts at a stable path
+mkdir -p /fastvm-scripts
+if [[ -d /opt/fastvm-scripts ]]; then
+    cp -f /opt/fastvm-scripts/*.sh /fastvm-scripts/ 2>/dev/null || true
+    chmod +x /fastvm-scripts/*.sh 2>/dev/null || true
+fi
+
+# 2. Runtime dirs (cheap; no recursive chown of /config — can be huge)
+mkdir -p /config/backups /config/recordings /config/.fastvm /var/log/fastvm /defaults 2>/dev/null || true
+chown abc:abc /config/backups /config/recordings /config/.fastvm /var/log/fastvm /defaults 2>/dev/null || true
+
+# 2a. Ensure PulseAudio uses the FastVM default config if the existing user config
+# is missing the native socket bridge needed for KasmVNC audio.
+if [[ -f /etc/fastvm/pulseaudio-default.pa ]]; then
+    mkdir -p /config/.config/pulse 2>/dev/null || true
+    if [[ ! -f /config/.config/pulse/default.pa ]] || \
+       ! grep -q 'module-native-protocol-unix.*socket=/tmp/pulse-socket' /config/.config/pulse/default.pa 2>/dev/null; then
+        cp /etc/fastvm/pulseaudio-default.pa /config/.config/pulse/default.pa 2>/dev/null || true
+        chown abc:abc /config/.config/pulse/default.pa 2>/dev/null || true
+    fi
+fi
+
+# 3. Default scheduled tasks (best-effort — never fatal)
+{
+    if [[ "${FASTVM_BACKUP_ENABLED:-true}" == "true" ]] && [[ ! -s /config/.fastvm/tasks.json ]]; then
+        FASTVM_DATA_ROOT=/config /fastvm-scripts/task-manager.sh init >/dev/null 2>&1 || true
+    fi
+
+    schedule_map() {
+        case "$1" in
+            daily)  echo "0 2 * * *" ;;
+            weekly) echo "0 2 * * 0" ;;
+            hourly) echo "0 * * * *" ;;
+            *)      echo "" ;;
+        esac
+    }
+    sched=$(schedule_map "${FASTVM_BACKUP_AUTO_SCHEDULE:-daily}")
+    if [[ -n "$sched" ]] && [[ "${FASTVM_BACKUP_ENABLED:-true}" == "true" ]]; then
+        FASTVM_DATA_ROOT=/config /fastvm-scripts/task-manager.sh add \
+            daily-backup "$sched" "/fastvm-scripts/backup-scheduler.sh" >/dev/null 2>&1 || true
+    fi
+} || true
+
+exit 0
