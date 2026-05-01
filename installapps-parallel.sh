@@ -151,7 +151,7 @@ log_info "Installing $TOTAL_APPS applications (max parallel: $MAX_PARALLEL)..."
 
 # Create temporary directory for job management
 JOB_DIR=$(mktemp -d)
-trap "rm -rf $JOB_DIR" EXIT
+trap 'rm -rf "$JOB_DIR"' EXIT
 
 # Function to run installation with job control
 run_with_job_control() {

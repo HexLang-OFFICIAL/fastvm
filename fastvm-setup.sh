@@ -129,7 +129,7 @@ case "$DE_SELECTION" in
         
         # Load dconf settings
         if [[ -f /jammy.dconf.conf ]]; then
-            export $(dbus-launch)
+            eval "$(dbus-launch)"
             dconf load / < /jammy.dconf.conf || log_warn "dconf load failed"
         else
             log_warn "dconf file not found"
