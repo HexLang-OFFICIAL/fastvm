@@ -222,7 +222,9 @@ wait_for_health() {
     while (( attempt < max )); do
         attempt=$(( attempt + 1 ))
 
-        if ! docker ps -q -f "name=$container" | grep -q .; then
+        local container_id
+        container_id=$(docker ps -q -f "name=$container" 2>/dev/null)
+        if [[ -z "$container_id" ]]; then
             echo -n "."; sleep 2; continue
         fi
 

@@ -47,10 +47,6 @@ install_packages() {
 
 log_info "Setting up Desktop Environment: $DE_SELECTION"
 
-# Update package list once
-echo "**** Updating package list ****"
-apt-get update
-
 case "$DE_SELECTION" in
     "KDE"|"KDE Plasma"|"KDE Plasma (Heavy)")
         log_info "Installing KDE Plasma..."
@@ -140,9 +136,7 @@ case "$DE_SELECTION" in
         fi
         
         # Disable login1
-        for file in $(find /usr -type f -iname "*login1*" 2>/dev/null); do
-            mv -v "$file" "$file.back" || true
-        done
+        find /usr -type f -iname "*login1*" 2>/dev/null -exec mv {} {}.back \;
         
         # Configure bashrc
         echo "sudo chmod u+s /usr/lib/dbus-1.0/dbus-daemon-launch-helper" >> ~/.bashrc
