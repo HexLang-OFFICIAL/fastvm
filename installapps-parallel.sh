@@ -161,7 +161,7 @@ run_with_job_control() {
 
     {
         install_app "$name" "$script" > "$JOB_DIR/job_$job_id.log" 2>&1; rc=$?
-        echo $rc > "$JOB_DIR/job_$job_id.status"
+        echo "$rc" > "$JOB_DIR/job_$job_id.status"
     } &
     echo $! > "$JOB_DIR/job_$job_id.pid"
     echo "$name" > "$JOB_DIR/job_$job_id.name"
