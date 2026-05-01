@@ -141,7 +141,7 @@ load_configuration() {
 
     # Export every FASTVM_* variable for docker-compose.
     for var in $(compgen -v FASTVM_ 2>/dev/null || true); do
-        export "$var"
+        export $var
     done
 
     echo ""
@@ -186,7 +186,8 @@ build_image() {
     log_step "Building FastVM Docker image"
     log_info "This may take a few minutes on first build…"
 
-    export BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    export BUILD_DATE
     export VERSION="${VERSION}"
 
     if ! $DOCKER_COMPOSE -f "${SCRIPT_DIR}/docker-compose.yml" build --parallel; then
@@ -250,7 +251,6 @@ wait_for_health() {
 show_status() {
     local port="${FASTVM_PORT:-3000}"
     local dport="${FASTVM_DASHBOARD_PORT:-3001}"
-    local name="${FASTVM_NAME:-FastVM}"
 
     echo ""
     echo -e "${CYAN}${BOLD}  ┌─────────────────────────────────────────────────────┐${NC}"
