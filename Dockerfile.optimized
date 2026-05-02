@@ -27,8 +27,6 @@ COPY root/ /
 RUN set -eu && \
     echo "**** Installing base dependencies ****" && \
     rm -f /etc/apt/sources.list.d/nodesource.list || true && \
-    # Add Mozilla PPA for Firefox
-    add-apt-repository -y ppa:mozillateam/ppa && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         # Core utils
