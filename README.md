@@ -1,5 +1,10 @@
 # FastVM
 
+[![Build and Publish FastVM Images](https://github.com/CloudCompile/fastvm/actions/workflows/build-images.yml/badge.svg?branch=main)](https://github.com/CloudCompile/fastvm/actions/workflows/build-images.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/CloudCompile/fastvm/pkgs/container/fastvm)
+[![GitHub stars](https://img.shields.io/github/stars/CloudCompile/fastvm?style=flat&color=yellow)](https://github.com/CloudCompile/fastvm/stargazers)
+
 **FastVM gives you a full Linux desktop inside a GitHub Codespace — accessible from any browser, no local installs required.** Fork this repo, open it in a Codespace, run one command, and you have a working Linux desktop in a new browser tab.
 
 ---
