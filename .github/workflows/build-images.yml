@@ -10,7 +10,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -39,6 +38,10 @@ jobs:
       packages: write
 
     steps:
+      - name: Set lowercase image name
+        id: image
+        run: echo "name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -61,11 +64,11 @@ jobs:
 
           echo "full_tag=$FULL_TAG" >> $GITHUB_OUTPUT
 
-          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$FULL_TAG-latest"
+          TAGS="${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:$FULL_TAG-latest"
 
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             VERSION="${{ github.ref_name }}"
-            TAGS="$TAGS"$'\n'"${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$FULL_TAG-$VERSION"
+            TAGS="$TAGS"$'\n'"${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:$FULL_TAG-$VERSION"
           fi
 
           echo "tags<<EOF" >> $GITHUB_OUTPUT
@@ -102,8 +105,8 @@ jobs:
             org.opencontainers.image.description=FastVM with ${{ matrix.desktop }} desktop${{ matrix.variant.name == '-fast' && ' - minimal & optimized' || '' }}
             org.opencontainers.image.version=${{ github.ref_name }}
             org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache-${{ matrix.desktop }}
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache-${{ matrix.desktop }},mode=max
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:buildcache-${{ matrix.desktop }}
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:buildcache-${{ matrix.desktop }},mode=max
           build-args: |
             BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
             VERSION=${{ github.ref_name }}
@@ -113,8 +116,13 @@ jobs:
     needs: build
     if: always()
     steps:
+      - name: Set lowercase image name
+        id: image
+        run: echo "name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build Summary
         run: |
+          IMAGE="${{ env.REGISTRY }}/${{ steps.image.outputs.name }}"
           echo "## 📦 FastVM Images Built Successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Available Images" >> $GITHUB_STEP_SUMMARY
@@ -133,17 +141,17 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### Fastest (XFCE4 Minimal)" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -d -p 3000:3000 ghcr.io/${{ github.repository }}:xfce4-fast-latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -d -p 3000:3000 $IMAGE:xfce4-fast-latest" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### Full-Featured (KDE)" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -d -p 3000:3000 ghcr.io/${{ github.repository }}:kde-latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -d -p 3000:3000 $IMAGE:kde-latest" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### Lightweight & Fast (LXQT Minimal)" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -d -p 3000:3000 ghcr.io/${{ github.repository }}:lxqt-fast-latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -d -p 3000:3000 $IMAGE:lxqt-fast-latest" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### What's Different?" >> $GITHUB_STEP_SUMMARY
