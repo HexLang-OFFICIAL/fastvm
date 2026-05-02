@@ -27,8 +27,6 @@ COPY root/ /
 RUN set -eu && \
     echo "**** Installing base dependencies ****" && \
     rm -f /etc/apt/sources.list.d/nodesource.list || true && \
-    # Add Mozilla PPA for Firefox
-    add-apt-repository -y ppa:mozillateam/ppa && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         # Core utils
@@ -125,4 +123,4 @@ EXPOSE 3000 3001
 VOLUME /config
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000/ && curl -f http://localhost:3001/api/health || exit 1
+    CMD curl -f http://localhost:8099/api/health
